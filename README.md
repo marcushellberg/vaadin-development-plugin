@@ -1,0 +1,43 @@
+# Vaadin Development Plugin
+
+Skills and tools for building high-quality Vaadin 25 applications with Java/Flow.
+
+## Overview
+
+This plugin provides Claude with deep knowledge about Vaadin 25 development patterns, best practices, and common pitfalls. It covers layouts, responsive design, component composition, forms, testing, data binding, and reactive state management. The plugin also integrates with the Vaadin MCP server for real-time documentation lookups.
+
+## Skills
+
+| Skill | Triggers when you ask about... |
+|-------|-------------------------------|
+| **vaadin-layouts** | HorizontalLayout, VerticalLayout, alignment, spacing, padding, flex-grow, layout sizing issues |
+| **responsive-layouts** | Mobile support, breakpoints, media queries, container queries, Lumo utility classes |
+| **reusable-components** | Custom components, Composite, component APIs, HasValue, HasComponents, encapsulation |
+| **forms-and-validation** | Binder, form fields, validation, converters, required fields, cross-field validation |
+| **ui-unit-testing** | Browser-free tests, UIUnitTest, component testers, fast view testing |
+| **testbench-testing** | End-to-end tests, TestBench, page objects, ElementQuery, browser testing |
+| **data-providers** | Grid data binding, lazy loading, filtering, sorting, Spring Pageable integration |
+| **signals** | Reactive state, ValueSignal, NumberSignal, effects, computed signals, shared state |
+
+## MCP Integration
+
+This plugin includes the Vaadin MCP server, which provides:
+
+- `search_vaadin_docs` — search the official Vaadin documentation
+- `get_component_java_api` — get Java API docs for any Vaadin component
+- `get_component_styling` — get styling/theming docs for components
+- `get_full_document` — retrieve complete documentation pages
+- `get_vaadin_version` — check the latest Vaadin version
+
+## Target Version
+
+- **Vaadin 25** (Java/Flow development model)
+- **Spring Boot 4** / **JUnit 6** compatible
+
+## Setup
+
+No additional configuration required. The Vaadin MCP server connects automatically.
+
+## Usage
+
+The skills trigger automatically based on conversation context. Ask about any Vaadin development topic and the relevant skill will activate, providing Claude with best practices and patterns specific to Vaadin 25.

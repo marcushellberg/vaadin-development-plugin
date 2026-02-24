@@ -1,0 +1,13 @@
+{
+  "name": "vaadin-development",
+  "owner": {
+    "name": "Vaadin"
+  },
+  "plugins": [
+    {
+      "name": "vaadin-development",
+      "source": "./",
+      "description": "Skills and tools for building Vaadin 25 applications with Java/Flow — layouts, components, forms, testing, data, and reactive state management"
+    }
+  ]
+}
