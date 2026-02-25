@@ -19,6 +19,7 @@ This plugin provides Claude with deep knowledge about Vaadin 25 development patt
 | **ui-unit-testing** | Browser-free tests, UIUnitTest, component testers, fast view testing |
 | **testbench-testing** | End-to-end tests, TestBench, page objects, ElementQuery, browser testing |
 | **data-providers** | Grid data binding, lazy loading, filtering, sorting, Spring Pageable integration |
+| **third-party-components** | Web Component wrapping, React component integration, @Tag, @NpmPackage, ReactAdapterComponent, DOM events, property sync |
 | **signals** | Reactive state, ValueSignal, NumberSignal, effects, computed signals, shared state |
 
 ## MCP Integration

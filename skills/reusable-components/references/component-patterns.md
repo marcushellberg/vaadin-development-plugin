@@ -101,6 +101,8 @@ public class MyComponent extends Composite<Div> {
 
 ## Web Component Wrapper Template
 
+> For in-depth guidance on integrating third-party Web Components or React components from npm, see the `third-party-components` skill.
+
 For wrapping a client-side web component with a Java API:
 
 ```java
