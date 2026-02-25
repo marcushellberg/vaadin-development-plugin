@@ -10,8 +10,10 @@ This plugin provides Claude with deep knowledge about Vaadin 25 development patt
 
 | Skill | Triggers when you ask about... |
 |-------|-------------------------------|
+| **theming** | Theme selection (Aura vs Lumo), color customization, dark mode, design tokens, component variants, utility classes |
+| **frontend-design** | Visual design, styling, animations, polished component compositions, making views look distinctive |
 | **vaadin-layouts** | HorizontalLayout, VerticalLayout, alignment, spacing, padding, flex-grow, layout sizing issues |
-| **responsive-layouts** | Mobile support, breakpoints, media queries, container queries, Lumo utility classes |
+| **responsive-layouts** | Mobile support, breakpoints, media queries, container queries, responsive utility classes |
 | **reusable-components** | Custom components, Composite, component APIs, HasValue, HasComponents, encapsulation |
 | **forms-and-validation** | Binder, form fields, validation, converters, required fields, cross-field validation |
 | **ui-unit-testing** | Browser-free tests, UIUnitTest, component testers, fast view testing |

@@ -188,7 +188,7 @@ Binder-level errors need a status label:
 
 ```java
 Div errorDisplay = new Div();
-errorDisplay.addClassName(LumoUtility.TextColor.ERROR);
+errorDisplay.addClassName(LumoUtility.TextColor.ERROR); // Lumo theme only; for Aura, use a custom CSS class
 binder.setStatusLabel(errorDisplay);
 ```
 

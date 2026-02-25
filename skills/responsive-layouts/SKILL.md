@@ -81,9 +81,11 @@ When responsiveness should be based on a component's container width rather than
 
 Container queries make components self-contained — they adapt to their own available space rather than assuming a specific viewport size.
 
-## Lumo Utility Classes for Responsive Design
+## Utility Classes for Responsive Design (Lumo Only)
 
 Vaadin's Lumo utility classes provide a mobile-first responsive system similar to Tailwind CSS. They are the fastest way to add responsive behavior without writing custom CSS.
+
+> **Note:** These utility classes only work with the Lumo theme. If using Aura, use CSS media queries or container queries instead (see sections above).
 
 **Setup (required in Vaadin 25):**
 
@@ -131,11 +133,12 @@ The utility classes follow a mobile-first pattern: define the mobile style as th
 
 ## Responsive Patterns
 
-### Pattern: Collapsible filter panel
+### Pattern: Collapsible filter panel (Lumo utility classes)
 
 On desktop, show a filter sidebar. On mobile, hide it behind a toggle button.
 
 ```java
+// Lumo theme only — uses LumoUtility classes
 // Filter panel — hidden on mobile, shown on desktop
 VerticalLayout filterPanel = new VerticalLayout();
 filterPanel.addClassNames(
@@ -158,7 +161,7 @@ Use CSS Grid for a card layout that adapts its column count.
 ```css
 .card-grid {
     display: grid;
-    gap: var(--lumo-space-m);
+    gap: 1rem;  /* or use theme token: var(--lumo-space-m) for Lumo */
     grid-template-columns: 1fr;  /* 1 column on mobile */
 }
 

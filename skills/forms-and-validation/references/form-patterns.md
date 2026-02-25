@@ -87,7 +87,7 @@ public class PersonForm extends Composite<FormLayout> {
             .bind(Person::getRole, Person::setRole);
 
         // Binder-level error display
-        errorDisplay.addClassName(LumoUtility.TextColor.ERROR);
+        errorDisplay.addClassName(LumoUtility.TextColor.ERROR); // Lumo theme only; for Aura, use a custom CSS class
         binder.setStatusLabel(errorDisplay);
     }
 

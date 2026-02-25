@@ -23,7 +23,7 @@ Before reaching for these layouts, consider whether a different component is a b
 
 **Use Dashboard instead** when building a grid of cards or widgets. Dashboard provides automatic responsive reflow, optional user-configurable drag-and-drop rearrangement, and proper grid-based sizing. Nesting HorizontalLayouts with wrapping to simulate a card grid is fragile and doesn't give you the two-dimensional control that a grid-based layout provides.
 
-**Use CSS Grid (via custom CSS or Lumo utility classes) instead** when you need a true two-dimensional grid layout — rows AND columns. HorizontalLayout and VerticalLayout are one-dimensional (flexbox). If you find yourself nesting multiple HorizontalLayouts inside a VerticalLayout to create a grid, CSS Grid is the right tool.
+**Use CSS Grid (via custom CSS, or Lumo utility classes if using the Lumo theme) instead** when you need a true two-dimensional grid layout — rows AND columns. HorizontalLayout and VerticalLayout are one-dimensional (flexbox). If you find yourself nesting multiple HorizontalLayouts inside a VerticalLayout to create a grid, CSS Grid is the right tool.
 
 **Use FormLayout instead** when arranging form fields. FormLayout handles responsive column counts, label positioning, and field sizing automatically.
 
@@ -135,7 +135,7 @@ When combining wrapping with `addToStart`/`addToMiddle`/`addToEnd`, group items 
 1. **Explicitly disable padding/spacing when not needed** — nested layouts accumulate unwanted space fast. Use `setPadding(false)` and `setSpacing(false)` on inner layouts.
 2. **Use the right layout component** — AppLayout for app shells, Dashboard for card grids, FormLayout for forms. Don't build everything with HorizontalLayout/VerticalLayout.
 3. **Don't over-nest** — a single-child HorizontalLayout just for alignment is unnecessary. Use `setAlignSelf()` on the parent instead.
-4. **Use Lumo utility classes for spacing fine-tuning** — `LumoUtility.Gap`, `LumoUtility.Padding` provide more granular control via `addClassNames()`.
+4. **Use Lumo utility classes for spacing fine-tuning** (Lumo theme only) — `LumoUtility.Gap`, `LumoUtility.Padding` provide more granular control via `addClassNames()`. For Aura, use custom CSS or `--vaadin-*-layout-gap` properties.
 5. **Use custom CSS properties for global adjustments** — `--vaadin-horizontal-layout-gap`, `--vaadin-vertical-layout-gap`, `--vaadin-*-layout-padding`, `--vaadin-*-layout-margin`.
 
 ## Detailed Reference

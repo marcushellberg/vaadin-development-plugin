@@ -1,4 +1,6 @@
-# Responsive Patterns Reference
+# Responsive Patterns Reference (Lumo Theme Only)
+
+> **Note:** The utility classes and breakpoint constants in this reference require the Lumo theme and `Lumo.UTILITY_STYLESHEET`. They do not work with the Aura theme. For Aura, use CSS media queries and container queries instead.
 
 ## Lumo Utility Breakpoints
 
@@ -25,7 +27,7 @@ public class Application implements AppShellConfigurator {
 
 This replaces the old `theme.json` approach from Vaadin 24.
 
-## Common Responsive Utility Class Patterns
+## Common Responsive Utility Class Patterns (Lumo Only)
 
 ### Show/hide elements
 
