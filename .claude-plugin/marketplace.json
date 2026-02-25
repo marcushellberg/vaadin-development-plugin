@@ -1,5 +1,8 @@
 {
   "name": "vaadin-development",
+  "metadata": {
+    "description": "Vaadin 25 development skills and MCP tools for Claude Code"
+  },
   "owner": {
     "name": "Vaadin"
   },
