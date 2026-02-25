@@ -38,10 +38,55 @@ This plugin includes the Vaadin MCP server, which provides:
 - **Vaadin 25** (Java/Flow development model)
 - **Spring Boot 4** / **JUnit 6** compatible
 
-## Setup
+## Prerequisites
 
-No additional configuration required. The Vaadin MCP server connects automatically.
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) version 1.0.33 or later (run `claude --version` to check)
+
+## Installation
+
+### Option 1: Install from marketplace (recommended)
+
+1. Add the marketplace:
+
+   ```shell
+   /plugin marketplace add marcushellberg/vaadin-development-plugin
+   ```
+
+2. Install the plugin:
+
+   ```shell
+   /plugin install vaadin-development@marcushellberg-vaadin-development-plugin
+   ```
+
+   Or open the plugin manager with `/plugin`, go to the **Discover** tab, and select **vaadin-development** to install interactively.
+
+### Option 2: Install from local directory
+
+Clone the repository and load it directly:
+
+```bash
+git clone https://github.com/marcushellberg/vaadin-development-plugin.git
+claude --plugin-dir ./vaadin-development-plugin
+```
 
 ## Usage
 
-The skills trigger automatically based on conversation context. Ask about any Vaadin development topic and the relevant skill will activate, providing Claude with best practices and patterns specific to Vaadin 25.
+The skills and MCP tools activate automatically based on conversation context. Ask about any Vaadin development topic and Claude will use the relevant skill along with the Vaadin MCP server for up-to-date documentation.
+
+### Examples
+
+- "Set up Aura theme with a custom color palette"
+- "Create a responsive master-detail view"
+- "Add form validation with Binder"
+- "Write UI unit tests for my view"
+- "Wrap a third-party Web Component for use in Flow"
+
+### Updating
+
+If you installed from the marketplace, update by running:
+
+```shell
+/plugin marketplace update marcushellberg-vaadin-development-plugin
+```
+
+Or enable auto-updates in the plugin manager under the **Marketplaces** tab.
