@@ -21,6 +21,7 @@ This plugin provides Claude with deep knowledge about Vaadin 25 development patt
 | **data-providers** | Grid data binding, lazy loading, filtering, sorting, Spring Pageable integration |
 | **third-party-components** | Web Component wrapping, React component integration, @Tag, @NpmPackage, ReactAdapterComponent, DOM events, property sync |
 | **signals** | Reactive state, ValueSignal, NumberSignal, effects, computed signals, shared state |
+| **views-and-navigation** | Views, routes, navigation, AppLayout, router layouts, SideNav, URL parameters, master-detail |
 
 ## MCP Integration
 
