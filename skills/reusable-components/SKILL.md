@@ -1,42 +1,68 @@
 ---
 name: reusable-components
 description: >
-  Guide Claude on composing reusable UI components in Vaadin 25 Flow with clean APIs.
-  This skill should be used when the user asks to "create a reusable component",
-  "build a custom component", "compose components", "extend a component",
-  "use Composite", "design a component API", "implement HasValue",
-  "implement HasComponents", or needs guidance on component encapsulation,
-  when to extend vs compose, and defining clean public interfaces for
-  Vaadin Flow components.
-version: 0.1.0
+  Guide Claude on structuring Vaadin 25 Flow views into focused, reusable components.
+  This skill should be used when the user asks to "structure a view", "organize view code",
+  "break down a complex view", "extract a component", "split a view into components",
+  "simplify a large view", "create a reusable component", "use Composite",
+  "compose components", or when a view is growing beyond ~200 lines,
+  has multiple logical sections, or contains repeated UI patterns.
+version: 0.2.0
 ---
 
-# Composing Reusable UI Components in Vaadin 25
+# Structuring Views into Components in Vaadin 25
 
 Use the Vaadin MCP tools (`search_vaadin_docs`, `get_component_java_api`) to look up the latest documentation whenever uncertain about a specific API detail. Always set `vaadin_version` to `"25"` and `ui_language` to `"java"`.
 
-## The Two Approaches: Extend vs. Composite
+## When to Extract Components
 
-There are two main ways to create custom components in Vaadin Flow. Choose based on how much of the root component's API you want to expose.
+Not every view needs decomposition. Extract when you see these signals:
 
-### Approach 1: Extend an existing component
+- **View exceeds ~200 lines** — hard to navigate and reason about
+- **Cohesive groups** — a cluster of components that form a logical unit (e.g., a filter bar, a detail panel)
+- **Repeated patterns** — the same group of components appears in multiple views
+- **Isolated state** — a section manages its own state independently from the rest of the view
 
-Use when you want to **add** to an existing component's API. The parent class's full public API remains accessible to users of your component.
+### Before and After
+
+A monolithic `OrderView` with filters, a grid, and a detail panel all in one class:
 
 ```java
-public class PrimaryButton extends Button {
-    public PrimaryButton(String text) {
-        super(text);
-        addThemeVariants(ButtonVariant.LUMO_PRIMARY); // LUMO_PRIMARY for Lumo, AURA_PRIMARY for Aura
+// BEFORE: everything in one 300-line view
+public class OrderView extends Composite<VerticalLayout> {
+    // 15 filter fields, grid setup, detail panel, all interleaved...
+}
+
+// AFTER: decomposed into focused components
+public class OrderView extends Composite<VerticalLayout> {
+
+    private final OrderFilterBar filterBar = new OrderFilterBar();
+    private final Grid<Order> grid = new Grid<>(Order.class);
+    private final OrderDetailPanel detailPanel = new OrderDetailPanel();
+
+    public OrderView(OrderService service) {
+        filterBar.addFilterChangeListener(e -> refreshGrid(service, e.getFilter()));
+        grid.asSingleSelect().addValueChangeListener(e -> detailPanel.setOrder(e.getValue()));
+        getContent().add(filterBar, grid, detailPanel);
     }
 }
 ```
 
-Good for: pre-configured variants, adding convenience methods, specializing behavior.
+Each extracted component owns its own layout and state; the view wires them together.
 
-Risk: every public method on the parent is part of your API. Users can call anything on Button, which may break your component's invariants.
+## The Extraction Workflow
 
-### Approach 2: Use Composite<T> (recommended for most cases)
+1. **Identify cohesive groups** — look for clusters of fields, buttons, or layouts that serve one purpose.
+2. **Define the boundary** — what does the component own (internal state, layout) vs. what does it need from outside (data, configuration)?
+3. **Choose the right base** — use `Composite<T>` by default. Extend an existing component only when you want its full API. Use `AbstractField<C, V>` when the component represents an editable value for Binder. See the next section for details.
+4. **Extract and wire up** — move the component's fields and layout code into its own class. Pass required data through constructors or setters.
+5. **Connect parent and child** — use method calls for parent→child communication, custom events for child→parent. See "Wiring Communication" below.
+
+## Choosing the Right Base: Composite vs. Extend
+
+When extracting a view section into its own component, you need to choose a base class. Lead with `Composite<T>` — it's the right choice in most cases.
+
+### Composite<T> (recommended default)
 
 Use when you want to **hide** the root component's API and expose only what you explicitly define. `Composite<T>` wraps a root component and makes `getContent()` protected, so users can only interact through your public methods.
 
@@ -65,11 +91,28 @@ public class UserCard extends Composite<HorizontalLayout> {
 }
 ```
 
-Good for: compound components, encapsulated UI blocks, anything that combines multiple components into a single reusable unit.
+Good for: compound components, encapsulated UI blocks, extracted view sections.
 
-**Prefer Composite for new reusable components.** It produces cleaner APIs and prevents accidental misuse.
+### Extend an existing component
 
-## Designing a Clean Component API
+Use when you want to **add** to an existing component's API. The parent class's full public API remains accessible.
+
+```java
+public class PrimaryButton extends Button {
+    public PrimaryButton(String text) {
+        super(text);
+        addThemeVariants(ButtonVariant.LUMO_PRIMARY); // LUMO_PRIMARY for Lumo, AURA_PRIMARY for Aura
+    }
+}
+```
+
+Good for: pre-configured variants, adding convenience methods, specializing behavior.
+
+Risk: every public method on the parent is part of your API. Users can call anything on Button, which may break your component's invariants.
+
+**Prefer Composite for new components.** It produces cleaner APIs and prevents accidental misuse. See the reference file for the full decision matrix.
+
+## Defining the Component's API
 
 ### Principles
 
@@ -108,56 +151,53 @@ public class StatusBadge extends Composite<Span> {
 }
 ```
 
-## Implementing Key Interfaces
+## Wiring Communication Between Components
 
-### HasValue<E, V> — for field-like components
+When a view is split into parent and child components, they need to communicate. Use the right pattern for the direction.
 
-Implement when your component represents an editable value that should work with `Binder`. This is the most important interface for form integration.
+### Parent → Child: method calls
 
-Requirements: define `setValue()`, `getValue()`, value change events, empty value, read-only mode, and required indicator.
-
-Extend `AbstractField<C, V>` for a base implementation that handles most of the boilerplate.
+The parent holds a reference to the child and calls its public methods directly:
 
 ```java
-public class StarRating extends AbstractField<StarRating, Integer> {
+// In the parent view
+detailPanel.setOrder(selectedOrder);
+filterBar.reset();
+```
 
-    public StarRating() {
-        super(0); // default/empty value
-        // build UI: 5 clickable star icons
+### Child → Parent: custom events
+
+Children should not know about their parent. Fire a typed event and let the parent listen:
+
+```java
+public class OrderFilterBar extends Composite<HorizontalLayout> {
+
+    public Registration addFilterChangeListener(
+            ComponentEventListener<FilterChangeEvent> listener) {
+        return addListener(FilterChangeEvent.class, listener);
     }
 
-    @Override
-    protected void setPresentationValue(Integer value) {
-        // update the star icons to reflect the value
+    private void onFilterChanged() {
+        fireEvent(new FilterChangeEvent(this, false, buildFilter()));
+    }
+
+    public static class FilterChangeEvent extends ComponentEvent<OrderFilterBar> {
+        private final OrderFilter filter;
+
+        public FilterChangeEvent(OrderFilterBar source, boolean fromClient,
+                OrderFilter filter) {
+            super(source, fromClient);
+            this.filter = filter;
+        }
+
+        public OrderFilter getFilter() {
+            return filter;
+        }
     }
 }
 ```
 
-### HasComponents — for container components
-
-Implement when your component can accept arbitrary child components. Provides `add()`, `remove()`, `removeAll()`.
-
-```java
-@Tag("div")
-public class CardGroup extends Component implements HasComponents {
-    // add() and remove() are provided by the interface
-}
-```
-
-Only implement this when arbitrary children make sense. If your component has specific slots (e.g., a header and a body), use explicit methods instead:
-
-```java
-public void setHeader(Component header) { ... }
-public void setBody(Component body) { ... }
-```
-
-### HasStyle — for style customization
-
-Automatically available on components that extend `Component`. Provides `addClassName()`, `getStyle()`, etc. Consider whether to delegate or restrict style access in your Composite.
-
-## Composition Patterns
-
-### Pattern: Wrapper with slots
+### Wrapper with Slots
 
 A common pattern for layout-style components with named areas:
 
@@ -187,56 +227,6 @@ public class PageHeader extends Composite<HorizontalLayout> {
 }
 ```
 
-### Pattern: Configurable via builder or fluent API
-
-For components with many optional configuration properties:
-
-```java
-public class DataCard extends Composite<VerticalLayout> {
-
-    public DataCard withTitle(String title) {
-        // add title component
-        return this;
-    }
-
-    public DataCard withIcon(VaadinIcon icon) {
-        // add icon
-        return this;
-    }
-
-    public DataCard withValue(String value) {
-        // add value display
-        return this;
-    }
-}
-
-// Usage:
-new DataCard()
-    .withTitle("Revenue")
-    .withIcon(VaadinIcon.DOLLAR)
-    .withValue("$1.2M");
-```
-
-### Pattern: Event-driven communication
-
-Use custom events for parent-child communication instead of callbacks:
-
-```java
-public class DeleteConfirmation extends Composite<Div> {
-
-    public Registration addConfirmListener(
-            ComponentEventListener<ConfirmEvent> listener) {
-        return addListener(ConfirmEvent.class, listener);
-    }
-
-    public static class ConfirmEvent extends ComponentEvent<DeleteConfirmation> {
-        public ConfirmEvent(DeleteConfirmation source, boolean fromClient) {
-            super(source, fromClient);
-        }
-    }
-}
-```
-
 ## Lifecycle Considerations
 
 - **onAttach()** — called when the component is added to the UI. Use for initialization that requires the component to be in the DOM (e.g., accessing session data, subscribing to event buses).
@@ -245,9 +235,9 @@ public class DeleteConfirmation extends Composite<Div> {
 
 ## Best Practices
 
-1. **Prefer Composite over direct extension** — it gives you API control and prevents leaking internals.
-2. **Keep components focused** — a component should do one thing well. If it has too many responsibilities, split it.
-3. **Use typed events over callbacks** — `addXxxListener()` returning `Registration` is the Vaadin way. It supports easy unsubscription and integrates with the event system.
-4. **Don't expose internal components** — return data from getters, not the underlying Spans and Divs. If you must expose a sub-component, document that it's an advanced/escape-hatch API.
-5. **Document your public API** — Javadoc on public methods of reusable components is worth the effort. Other developers (and AI assistants) will use it.
-6. **Test components in isolation** — reusable components should be testable with Vaadin's UI unit testing framework without needing a full application context.
+1. **Start with the view, extract when needed** — don't pre-optimize. Build the view first, then extract when signals appear (see "When to Extract Components").
+2. **Prefer Composite over direct extension** — it gives you API control and prevents leaking internals.
+3. **Keep components focused** — a component should do one thing well. If it has too many responsibilities, split it.
+4. **Use typed events for child→parent communication** — `addXxxListener()` returning `Registration` is the Vaadin way.
+5. **Don't expose internal components** — return data from getters, not the underlying Spans and Divs.
+6. **Test extracted components in isolation** — reusable components should be testable with Vaadin's UI unit testing framework without needing a full application context.

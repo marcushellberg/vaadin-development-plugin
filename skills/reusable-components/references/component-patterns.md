@@ -4,9 +4,9 @@
 
 | Scenario | Base class | Why |
 |----------|-----------|-----|
+| Extracting a view section into its own component | `Composite<T>` | Hides internals, clean API |
 | Pre-configured variant of existing component | Extend the component | You want the full parent API |
 | Combining multiple components into one | `Composite<T>` | Hides root API, clean encapsulation |
-| Wrapping a web component with a Java API | Extend `Component` with `@Tag` | Direct element access needed |
 | Field that works with Binder | `AbstractField<C, V>` | Handles value change boilerplate |
 | Container that accepts children | `Component` + `HasComponents` | Provides standard add/remove API |
 | Layout-like component with named slots | `Composite<T>` with slot methods | Explicit API over generic add() |
@@ -99,48 +99,82 @@ public class MyComponent extends Composite<Div> {
 }
 ```
 
-## Web Component Wrapper Template
+## Builder / Fluent API Pattern
 
-> For in-depth guidance on integrating third-party Web Components or React components from npm, see the `third-party-components` skill.
-
-For wrapping a client-side web component with a Java API:
+For components with many optional configuration properties:
 
 ```java
-@Tag("my-web-component")
-@JsModule("my-web-component/my-web-component.js")
-public class MyWebComponent extends Component {
+public class DataCard extends Composite<VerticalLayout> {
 
-    // Property access
-    public void setLabel(String label) {
-        getElement().setProperty("label", label);
+    public DataCard withTitle(String title) {
+        // add title component
+        return this;
     }
 
-    public String getLabel() {
-        return getElement().getProperty("label", "");
+    public DataCard withIcon(VaadinIcon icon) {
+        // add icon
+        return this;
     }
 
-    // Event handling
-    @DomEvent("item-click")
-    public static class ItemClickEvent extends ComponentEvent<MyWebComponent> {
-        private final String detail;
+    public DataCard withValue(String value) {
+        // add value display
+        return this;
+    }
+}
 
-        public ItemClickEvent(MyWebComponent source, boolean fromClient,
-                @EventData("event.detail") String detail) {
-            super(source, fromClient);
-            this.detail = detail;
-        }
+// Usage:
+new DataCard()
+    .withTitle("Revenue")
+    .withIcon(VaadinIcon.DOLLAR)
+    .withValue("$1.2M");
+```
 
-        public String getDetail() {
-            return detail;
-        }
+## Advanced: Field and Container Interfaces
+
+### HasValue<E, V> — for field-like components
+
+Implement when your component represents an editable value that should work with `Binder`. This is the most important interface for form integration.
+
+Requirements: define `setValue()`, `getValue()`, value change events, empty value, read-only mode, and required indicator.
+
+Extend `AbstractField<C, V>` for a base implementation that handles most of the boilerplate.
+
+```java
+public class StarRating extends AbstractField<StarRating, Integer> {
+
+    public StarRating() {
+        super(0); // default/empty value
+        // build UI: 5 clickable star icons
     }
 
-    public Registration addItemClickListener(
-            ComponentEventListener<ItemClickEvent> listener) {
-        return addListener(ItemClickEvent.class, listener);
+    @Override
+    protected void setPresentationValue(Integer value) {
+        // update the star icons to reflect the value
     }
 }
 ```
+
+### HasComponents — for container components
+
+Implement when your component can accept arbitrary child components. Provides `add()`, `remove()`, `removeAll()`.
+
+```java
+@Tag("div")
+public class CardGroup extends Component implements HasComponents {
+    // add() and remove() are provided by the interface
+}
+```
+
+Only implement this when arbitrary children make sense. If your component has specific slots, use explicit methods instead:
+
+```java
+public void setHeader(Component header) { ... }
+public void setBody(Component body) { ... }
+```
+
+### HasStyle — for style customization
+
+Automatically available on components that extend `Component`. Provides `addClassName()`, `getStyle()`, etc. Consider whether to delegate or restrict style access in your Composite.
 
 ## Lifecycle Pattern: Event Bus Subscription
 
@@ -216,3 +250,21 @@ public class UserManagementPanel extends Composite<Div> {
 ```
 
 Split into focused components and compose them at the view level.
+
+### Premature extraction
+
+```java
+// BAD: extracting a trivial 3-line setup into its own class
+public class SaveButton extends Composite<Button> {
+    public SaveButton() {
+        getContent().setText("Save");
+        getContent().addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+    }
+}
+
+// GOOD: just configure inline — no component needed
+var saveButton = new Button("Save");
+saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+```
+
+Don't extract until there's a real reason: reuse, encapsulated state, or growing complexity.
